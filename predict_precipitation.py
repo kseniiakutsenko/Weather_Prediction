@@ -9,7 +9,7 @@ from sklearn.metrics import r2_score
 
 
 def predict_prep(ctrl_data):
-    estate_valuation = pd.read_csv('data/weather_data.csv')
+    estate_valuation = pd.read_csv('data/weather_data_for_prediction.csv')
 
     corr_matrix = estate_valuation.corr()
     sns.heatmap(corr_matrix, annot=True)
@@ -17,14 +17,14 @@ def predict_prep(ctrl_data):
 
     train, test = train_test_split(estate_valuation, test_size=0.25, random_state=42)
 
-    cols = ['temperature_2m_min', 'temperature_2m_mean', 'shortwave_radiation_sum', 'precipitation_hours',
-            'windspeed_10m_max', 'windgusts_10m_max', 'winddirection_10m_dominant']
+    cols = ['time', 'temperature_2m', 'relativehumidity_2m', 'surface_pressure',
+            'cloudcover', 'direct_radiation', 'diffuse_radiation', 'windspeed_10m']
 
     train_x = np.array(train[cols])
     test_x = np.array(test[cols])
 
-    train_y = np.array(train['precipitation_sum'])
-    test_y = np.array(test['precipitation_sum'])
+    train_y = np.array(train['precipitation'])
+    test_y = np.array(test['precipitation'])
 
     lr = LinearRegression()
     model = lr.fit(train_x, train_y)
@@ -41,17 +41,18 @@ def predict_prep(ctrl_data):
     x, y = zip(*sorted(zip(prediction, test_y)))
     plt.clf()
     plt.plot(x, y)
-    plt.plot([0, 20], [0, 20], '--r')
+    plt.plot([0, 2], [0, 2], '--r')
     plt.xlabel('Prediction')
     plt.ylabel('Real values')
 
     plt.savefig('data/graph.png')
 
     new_data = pd.DataFrame(
-        {"temperature_2m_min": [ctrl_data[0]], "temperature_2m_mean": [ctrl_data[1]],
-         "shortwave_radiation_sum": [ctrl_data[2]],
-         "precipitation_hours": [ctrl_data[3]], "windspeed_10m_max": [ctrl_data[4]],
-         "windgusts_10m_max": [ctrl_data[5]],
-         "winddirection_10m_dominant": [ctrl_data[6]]})
+        {"time": [ctrl_data[0]], "temperature_2m": [ctrl_data[1]],
+         "relativehumidity_2m": [ctrl_data[2]],
+         "surface_pressure": [ctrl_data[3]], "cloudcover": [ctrl_data[4]],
+         "direct_radiation": [ctrl_data[5]],
+         "diffuse_radiation": [ctrl_data[6]], "windspeed_10m": [ctrl_data[7]]})
 
     return model.predict(new_data)
+
